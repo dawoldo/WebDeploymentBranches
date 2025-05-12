@@ -1,37 +1,36 @@
 // Login form submission
 document.getElementById('login-form').addEventListener('submit', async (event) => {
-    event.preventDefault();
-  
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-  
-    try {
-      const response = await fetch('/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include', // Sends/receives cookies
-        body: JSON.stringify({ username, password })
-      });
-  
-      const result = await response.json();
-      console.log(result);
-      console.log(response);
+  event.preventDefault();
 
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
 
-      if (response.ok == true && result.redirectTo) {
-        console.log("Redirecting to", result.redirectTo);
-        window.location.assign(result.redirectTo);
-          } else {
-        alert(result.error || 'Login failed');
-      }
-    } catch (error) {
-      console.error('Error logging in:', error);
-      alert('An error occurred');
+  try {
+    const response = await fetch("http://localhost:8000/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      credentials: "include",
+      body: JSON.stringify({ username, password })
+    });
+    
+    const result = await response.json();
+    console.log(result);
+    console.log(response);
+
+    if (response.ok == true && result.redirectTo) {
+      console.log("Redirecting to", result.redirectTo);
+      window.location.assign(result.redirectTo);
+        } else {
+      alert(result.error || 'Login failed');
     }
-  
-    event.target.reset();
+  } catch (error) {
+    console.error('Error logging in:', error);
+    alert('An error occurred');
+  }
+
+  event.target.reset();
 });
 
 // Registration form submission
