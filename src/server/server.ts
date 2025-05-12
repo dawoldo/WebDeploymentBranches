@@ -2,6 +2,7 @@ import { Application, Context, Router } from "https://deno.land/x/oak@v12.6.1/mo
 import { handleWebSocketConnection } from './webSocketHandler.ts';
 import { startGameLoop } from "./GameLoop.ts";
 import { create, getNumericDate, verify, Header, Payload } from "https://deno.land/x/djwt/mod.ts";
+import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
 
 export const PORT = Number(Deno.args[0] || 3000);
 export const HOSTNAME = "0.0.0.0";
@@ -24,9 +25,16 @@ const JWT_KEY = await crypto.subtle.generateKey(
 
 // Sample user data
 let users: User[] = [
-  { id: '0', username: 'admin', password: 'admin' },
-  { id: '1', username: 'LeZ', password: 'LeZ' }
+  { id: '0', username: 'admin', password: await hashPassword('admin') },
+  { id: '1', username: 'LeZ', password: await hashPassword('LeZ') }
 ];
+
+// Helper function to hash passwords
+async function hashPassword(password: string): Promise<string> {
+  const saltRounds = 10;
+  const salt = await bcrypt.genSalt(saltRounds);
+  return await bcrypt.hash(password, salt);
+}
 
 const GAME_PAGE = "/index.html";
 const LOGIN_PAGE = "/authentification/login.html";
@@ -83,31 +91,41 @@ async function authenticate(ctx: Context, next: () => Promise<unknown>) {
 router.post("/login", async (ctx: Context) => {
   const { username, password } = await ctx.request.body().value;
 
-  const user = users.find(u => u.username === username && u.password === password);
+  const user = users.find(u => u.username === username);
 
   if (user) {
-    const payload: Payload = {
-      username: user.username,
-      exp: getNumericDate(60 * 60 * 24)
-    };
 
-    const header: Header = {
-      alg: "HS256",
-      typ: "JWT"
-    };
+    const passwordIsValid = await bcrypt.compare(password, user.password);
 
-    const token = await create(header, payload, JWT_KEY);
-
-    ctx.cookies.set("login-info", token, {
-      httpOnly: true,
-      maxAge: 60 * 60 * 24,
-      path: "/",
-      secure: false,
-    });
-
-    ctx.response.status = 200;
-    ctx.response.type = "application/json";
-    ctx.response.body = { redirectTo: GAME_PAGE };
+    if (passwordIsValid) {
+      const payload: Payload = {
+        username: user.username,
+        exp: getNumericDate(60 * 60 * 24)
+      };
+  
+      const header: Header = {
+        alg: "HS256",
+        typ: "JWT"
+      };
+  
+      const token = await create(header, payload, JWT_KEY);
+  
+      ctx.cookies.set("login-info", token, {
+        httpOnly: true,
+        maxAge: 60 * 60 * 24,
+        path: "/",
+        secure: false,
+      });
+  
+      ctx.response.status = 200;
+      ctx.response.type = "application/json";
+      ctx.response.body = { redirectTo: GAME_PAGE };
+  
+    } else {
+      ctx.response.status = 401;
+      ctx.response.type = "application/json";
+      ctx.response.body = { error: "Invalid credentials" };
+    }
   } else {
     ctx.response.status = 401;
     ctx.response.type = "application/json";
