@@ -35,7 +35,8 @@ const keys = {
 };
 
 // Setup WebSocket
-let ws = new WebSocket(`ws://${location.hostname}:3000/ws`);
+//let ws = new WebSocket(`ws://${location.hostname}:3000/ws`);
+let ws = new WebSocket(`ws://localhost:8000/ws`);
 
 ws.onmessage = (event) => {
   const data = JSON.parse(event.data);
@@ -126,12 +127,16 @@ ws.onmessage = (event) => {
   }
 };
 
-// Rest of the WebSocket handlers and other code remains the same...
-ws.onclose = () => {
-  console.log("Disconnected, reconnecting...");
-  setTimeout(() => {
-    ws = new WebSocket(`ws://${location.hostname}:3000/ws`);
-  }, 1000);
+ws.onclose = (event) => {
+  console.warn("WebSocket closed:", event);
+  if (event.code === 1006 || event.code === 1005) {
+    // Could indicate auth failure / unexpected disconnect
+    alert("Session expired or not logged in. Redirecting to login...");
+    window.location.href = "/authentification/login.html";
+  } else {
+    // Try reconnecting after delay
+    setTimeout(connectWebSocket, 1000);
+  }
 };
 
 // Input handling (unchanged)
@@ -179,7 +184,6 @@ CANVAS.addEventListener("click", (e) => {
 
 // Rendering (unchanged but uses gameState)
 function render() {
-  console.log(gameState.players)
   CONTEXT.clearRect(0, 0, CANVAS.width, CANVAS.height);
   
   // Render players with their sprites
