@@ -9,7 +9,7 @@ export class DatabaseHandler {
         this.initDatabase();
     }
 
-    private async initDatabase() {
+    private initDatabase() {
         this.db.query("DROP TABLE IF EXISTS Users");
         this.db.query("DROP TABLE IF EXISTS Permissions");
 
@@ -33,6 +33,7 @@ export class DatabaseHandler {
     }
 
     public async addUser(newUsername: string, nakedPassword: string, permission_id: number = 3) {
+
         const checkUsername = this.db.query("SELECT username FROM Users WHERE username = ?", [newUsername]);
 
         if (checkUsername.length > 0) {
@@ -41,6 +42,10 @@ export class DatabaseHandler {
 
         const hashedPassword = await this.hashPassword(nakedPassword);
         this.db.query("INSERT INTO Users (username, password_hash, permission_id) VALUES (?,?,?)", [newUsername, hashedPassword, permission_id]);
+        
+        console.log("Stored hash for", newUsername);
+        console.log("Hashing password:", nakedPassword);
+            
     }
 
     public getAllUsers() {
@@ -68,8 +73,10 @@ export class DatabaseHandler {
     public async verifyLogin(username: string, password: string): Promise<boolean> {
         const password_hash = this.db.query("SELECT password_hash FROM Users WHERE username = ?", [username]);
         if (password_hash.length === 0) {
-            throw Error("Wrong username or password.")
+            console.log("Wrong username or password.");
+            throw Error("Wrong username or password.");
         }
+        
         return await bcrypt.compare(password, password_hash[0][0] as string);
     }
 
