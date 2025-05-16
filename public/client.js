@@ -36,7 +36,7 @@ const keys = {
 
 // Setup WebSocket
 //let ws = new WebSocket(`ws://${location.hostname}:3000/ws`);
-let ws = new WebSocket(`ws://localhost:8000/ws`);
+const ws = new WebSocket(`ws://localhost:8000/ws`);
 
 ws.onmessage = (event) => {
   const data = JSON.parse(event.data);
@@ -201,7 +201,7 @@ function render() {
     CONTEXT.fillText(id.substring(0, 6), player.x, player.y - 5);
   }
 
-  for (const [id, enemy] of Object.entries(gameState.enemies)) {
+  for (const [_id, enemy] of Object.entries(gameState.enemies)) {
     const sprite = SPRITE_DATA[enemy.sprite] || SPRITE_DATA.neutral;
     CONTEXT.drawImage(
       SPRITESHEET,
@@ -211,7 +211,7 @@ function render() {
   }
   
   // Render projectiles
-  for (const [id, projectile] of Object.entries(gameState.projectiles)) {
+  for (const [_id, projectile] of Object.entries(gameState.projectiles)) {
     const spriteInfo = SPRITE_DATA[projectile.sprite];
     CONTEXT.drawImage(
       SPRITESHEET,
