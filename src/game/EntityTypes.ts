@@ -164,7 +164,7 @@ export class HomingProjectile extends Projectile {
         this.findClosestTarget();
     }
 
-    public update() {
+    public override update() {
         this.updateHoming();
         super.update(); // Use parent class movement logic
     }

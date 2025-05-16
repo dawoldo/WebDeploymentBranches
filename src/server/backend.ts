@@ -1,16 +1,13 @@
 // src/server/backend.ts
-import { Application } from "https://deno.land/x/oak/mod.ts";
+import { Application, Context } from "https://deno.land/x/oak/mod.ts";
 import { oakCors } from "https://deno.land/x/cors/mod.ts";
 import { handleWebSocketConnection } from "./webSocketHandler.ts";
 import { startGameLoop } from "./GameLoop.ts";
-import { DatabaseHandler } from "../database/DatabaseHandler.ts";
 import { errorHandler, corsMiddleware, authenticate } from "./middlewares.ts";
 import router from "./routes.ts";
 
 const PORT = 8000;
 export const JWT_KEY = await crypto.subtle.generateKey({ name: "HMAC", hash: "SHA-256" }, true, ["sign", "verify"]);
-
-const db = new DatabaseHandler();
 
 const app = new Application();
 
