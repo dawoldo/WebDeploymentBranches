@@ -1,8 +1,9 @@
 // src/server/routes.ts
-import { Router, Context } from "https://deno.land/x/oak/mod.ts";
+import { Router, Context , Next} from "https://deno.land/x/oak/mod.ts";
 import { create, getNumericDate } from "https://deno.land/x/djwt/mod.ts";
 import { DatabaseHandler } from "../database/DatabaseHandler.ts";
 import { JWT_KEY } from "./backend.ts";
+import { verify, Payload } from "https://deno.land/x/djwt/mod.ts";
 
 const db = new DatabaseHandler();
 const router = new Router();
@@ -12,8 +13,12 @@ router.post("/login", async (ctx: Context) => {
   const { username, password } = body;
   try {
     if (await db.verifyLogin(username, password)) {
+      
+      const permTier = db.getUserPermissions(username);
+
       const payload = {
         username: username,
+        permissionTier: permTier,
         exp: getNumericDate(60 * 60 * 24),
       };
 
@@ -36,7 +41,7 @@ router.post("/login", async (ctx: Context) => {
   }
 });
 
-router.post("/users", async (ctx: Context) => {
+router.post("/users", (ctx: Context) => {
   try {
     const users = db.getAllUsers();
     ctx.response.headers.set("Content-Type", "application/json");
@@ -63,5 +68,22 @@ router.post("/register", async (ctx: Context) => {
 
   console.log(db.getAllUsers());
 });
+
+export async function getPermissionTier(ctx: Context, next: Next) {
+  const token = await ctx.cookies.get("login-info");
+  if (!token) {
+    ctx.response.status = 401;
+    return;
+  }
+
+  try {
+    const payload = await verify(token, JWT_KEY) as Payload;
+    const permissionTier = payload.permissionTier;
+    ctx.state.permissionTier = permissionTier; // Store permission tier in context state
+    await next();
+  } catch {
+    ctx.response.status = 401;
+  }
+}
 
 export default router;
