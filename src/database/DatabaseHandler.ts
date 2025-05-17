@@ -4,7 +4,7 @@ import { DB } from "https://deno.land/x/sqlite/mod.ts";
 export class DatabaseHandler {
     private db: DB;
 
-    constructor(dbPath: string = "test.db") {
+    constructor(dbPath: string = "src/database/database.db") {
         this.db = new DB(dbPath);
         this.initDatabase();
     }
@@ -12,6 +12,9 @@ export class DatabaseHandler {
     private initDatabase() {
         this.db.query("DROP TABLE IF EXISTS Users");
         this.db.query("DROP TABLE IF EXISTS Permissions");
+        this.db.query("DROP TABLE IF EXISTS Weapons");
+        this.db.query("DROP TABLE IF EXISTS Inventories");
+        
 
         this.db.query(`CREATE TABLE IF NOT EXISTS Permissions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -75,9 +78,19 @@ export class DatabaseHandler {
         if (password_hash.length === 0) {
             console.log("Wrong username or password.");
             throw Error("Wrong username or password.");
+        } else {
+            return await bcrypt.compare(password, password_hash[0][0] as string);
         }
-        
-        return await bcrypt.compare(password, password_hash[0][0] as string);
+    }
+
+    public getUserPermissions(username: string) {
+        const userPerms = this.db.query("SELECT permission_id FROM Users WHERE username = ?", [username]);
+        if (userPerms.length === 0) {
+            throw Error("User does no exist.");
+        } else {
+            return userPerms[0][0] as string; 
+        }
+
     }
 
 
