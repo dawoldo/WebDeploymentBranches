@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bullet Hell Game</title>
+    <title>ROTMP</title>
     <style>
         body {
             margin: 0;
@@ -12,14 +12,45 @@
             align-items: center;
             height: 100vh;
             background-color: #222;
+            flex-direction: column;
         }
         canvas {
             background-color: #000;
+        }
+        #chatContainer {
+            width: 300px;
+            height: 400px;
+            background-color: #333;
+            color: white;
+            overflow-y: auto;
+            border: 1px solid #555;
+            margin-top: 20px;
+            padding: 10px;
+        }
+        #messageForm {
+            display: flex;
+            margin-top: 10px;
+        }
+        #messageInput {
+            flex: 1;
+            padding: 10px;
+        }
+        #messageSubmit {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
     <canvas id="renderWindow"></canvas>
+    <div id="chatContainer"></div>
+    <form id="messageForm">
+        <input type="text" id="messageInput" placeholder="Type your message here..." autocomplete="off">
+        <button type="submit" id="messageSubmit">Send</button>
+    </form>
     <script src="/client.js"></script>
 </body>
 </html>
