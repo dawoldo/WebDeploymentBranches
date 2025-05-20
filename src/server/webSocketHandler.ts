@@ -4,7 +4,7 @@ import { Context } from "https://deno.land/x/oak@v12.6.1/mod.ts";
 import { gameState, activeConnections, broadcastGameState } from './GameState.ts';
 import { Player } from "../game/EntityTypes.ts";
 import { WORLD_WIDTH, WORLD_HEIGHT } from './config.ts';
-import { burstShot, crossShot } from "../game/ProjectilePatterns.ts";
+import { burstShot } from "../game/ProjectilePatterns.ts";
 
 // Handle new WebSocket connections
 export function handleWebSocketConnection(ctx: Context): void {
@@ -80,6 +80,18 @@ export function handleWebSocketConnection(ctx: Context): void {
         if (length > 0) {
           burstShot(player.x, player.y, playerId, dx, dy, length, 0.15, 1, gameState);
         }
+      }
+      
+      if (data.type === "chat") {
+        // Broadcast chat message to all clients
+        const chatMessage = JSON.stringify({
+          type: "chat",
+          playerId: playerId,
+          message: data.message,
+        });
+        activeConnections.forEach(conn => {
+            conn.send(chatMessage);
+        });
       }
     } catch (err) {
       console.warn("Invalid message from", playerId, ":", err);

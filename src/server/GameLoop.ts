@@ -18,7 +18,7 @@ export function updateGame(): void {
   }
 
   // Update enemies
-  for (const [id, enemy] of gameState.enemies) {
+  for (const [_id, enemy] of gameState.enemies) {
     enemy.update();
   } 
   
@@ -42,7 +42,7 @@ export function updateGame(): void {
   for (const collision of collisions) {
     const sprite = ["smiling", "uncarved", "spooky", "neutral"][Math.floor(Math.random() * 4)];
     gameState.projectiles.delete(collision.projectileId);
-    let targetedPlayer = gameState.players.get(collision.playerId);
+    const targetedPlayer = gameState.players.get(collision.playerId);
     if (!targetedPlayer) {
       continue;
     }

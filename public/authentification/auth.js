@@ -44,9 +44,21 @@ document.getElementById('registration-form').addEventListener('submit', async (e
     // Check if passwords match
     if (password !== confirmPassword) {
         alert('Passwords do not match');
-    } else {
-        console.log(`New User ${username}, ${password} attempted to be created`);
+        return;
     }
+
+        const response = await fetch('http://localhost:8000/register', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+            username: username,
+            password: password
+        })
+    });
+
 
     event.target.reset();
 });

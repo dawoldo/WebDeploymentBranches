@@ -1,4 +1,4 @@
-import type { Player, Projectile, Collidable } from "./EntityTypes";
+import type { Player, Projectile, Collidable } from "./EntityTypes.ts";
 
 export interface CollisionPair {
     projectileId: string;
