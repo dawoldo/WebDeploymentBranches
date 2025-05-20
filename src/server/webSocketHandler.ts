@@ -81,6 +81,18 @@ export function handleWebSocketConnection(ctx: Context): void {
           burstShot(player.x, player.y, playerId, dx, dy, length, 0.15, 1, gameState);
         }
       }
+      
+      if (data.type === "chat") {
+        // Broadcast chat message to all clients
+        const chatMessage = JSON.stringify({
+          type: "chat",
+          playerId: playerId,
+          message: data.message,
+        });
+        activeConnections.forEach(conn => {
+            conn.send(chatMessage);
+        });
+      }
     } catch (err) {
       console.warn("Invalid message from", playerId, ":", err);
     }

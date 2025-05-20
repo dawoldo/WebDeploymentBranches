@@ -35,16 +35,25 @@ const keys = {
 };
 
 // Setup WebSocket
-//let ws = new WebSocket(`ws://${location.hostname}:3000/ws`);
 const ws = new WebSocket(`ws://localhost:8000/ws`);
+
+// Function to send chat messages
+function sendChatMessage(message) {
+  if (ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({
+      type: "chat",
+      message: message,
+    }));
+  }
+}
 
 ws.onmessage = (event) => {
   const data = JSON.parse(event.data);
-  
+
   if (data.type === "welcome") {
     gameState.myPlayerId = data.playerId;
     gameState.worldSize = data.worldSize || { width: 700, height: 500 };
-    
+
     // Initialize all players with their sprites
     if (data.allPlayers) {
       gameState.players = {};
@@ -56,14 +65,12 @@ ws.onmessage = (event) => {
         };
       }
     }
-    
+
     // Set canvas size
     CANVAS.width = gameState.worldSize.width;
     CANVAS.height = gameState.worldSize.height;
     return;
-  }
-  
-  if (data.type === "gameState") {
+  } else if (data.type === "gameState") {
     // Update players with their sprites
     if (data.players) {
       for (const player of data.players) {
@@ -83,7 +90,7 @@ ws.onmessage = (event) => {
           }
         }
       }
-      
+
       // Remove disconnected players
       const currentPlayerIds = data.players.map(p => p.id);
       for (const playerId in gameState.players) {
@@ -112,7 +119,7 @@ ws.onmessage = (event) => {
         }
       }
     }
-    
+
     // Update projectiles
     if (data.projectiles) {
       gameState.projectiles = {};
@@ -123,7 +130,17 @@ ws.onmessage = (event) => {
           sprite: projectile.sprite || "brick" // Only store what's needed for rendering
         };
       }
-    }    
+    }
+  } else if (data.type === "chat") {
+    // Handle chat message
+    console.log("Received chat message:", data.message);
+    // Display the chat message in your chat container
+    const chatContainer = document.getElementById('chatContainer');
+    if (chatContainer) {
+      const messageElement = document.createElement('div');
+      messageElement.textContent = `${data.playerId}: ${data.message}`;
+      chatContainer.appendChild(messageElement);
+    }
   }
 };
 
@@ -168,11 +185,11 @@ function sendInput() {
 // Shooting (unchanged)
 CANVAS.addEventListener("click", (e) => {
   if (!gameState.myPlayerId) return;
-  
+
   const rect = CANVAS.getBoundingClientRect();
   const targetX = e.clientX - rect.left;
   const targetY = e.clientY - rect.top;
-  
+
   if (ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({
       type: "shoot",
@@ -185,7 +202,7 @@ CANVAS.addEventListener("click", (e) => {
 // Rendering (unchanged but uses gameState)
 function render() {
   CONTEXT.clearRect(0, 0, CANVAS.width, CANVAS.height);
-  
+
   // Render players with their sprites
   for (const [id, player] of Object.entries(gameState.players)) {
     const sprite = SPRITE_DATA[player.sprite] || SPRITE_DATA.neutral;
@@ -194,7 +211,7 @@ function render() {
       sprite.x, sprite.y, 10, 10,
       player.x, player.y, 10, 10
     );
-    
+
     // Draw player name
     CONTEXT.fillStyle = id === gameState.myPlayerId ? "#0f0" : "#fff";
     CONTEXT.font = "8px Arial";
@@ -209,7 +226,7 @@ function render() {
       enemy.x, enemy.y, 10, 10
     );
   }
-  
+
   // Render projectiles
   for (const [_id, projectile] of Object.entries(gameState.projectiles)) {
     const spriteInfo = SPRITE_DATA[projectile.sprite];
@@ -219,7 +236,7 @@ function render() {
       projectile.x, projectile.y, 10, 10
     );
   }
-  
+
   requestAnimationFrame(render);
 }
 
@@ -230,3 +247,25 @@ CANVAS.style.border = "5px solid black";
 
 // Start game loop
 render();
+
+// Ensure DOM is fully loaded before accessing elements
+document.addEventListener('DOMContentLoaded', () => {
+    const messageForm = document.getElementById('messageForm');
+    const messageInput = document.getElementById('messageInput');
+
+    if (messageForm && messageInput) {
+        messageForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const message = messageInput.value.trim();
+            if (message) {
+                // Here you will send the message with a WebSocket
+                console.log('Message to send:', message);
+
+                sendChatMessage(message);
+                messageInput.value = ''; // Clear the input field
+            }
+        });
+    } else {
+        console.error('Message form or input not found');
+    }
+});
