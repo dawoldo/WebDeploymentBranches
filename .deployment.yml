@@ -11,7 +11,7 @@ deploy-backend:
     - git checkout -B prod-backend origin/prod-backend 2>/dev/null || git checkout --orphan prod-backend
     - rm -rf *
     - mkdir -p src/backend
-    - git checkout origin/main -- src/server/  # Use origin/main instead of main
+    - git checkout origin/main -- src/backend/  # Use origin/main instead of main
     - git add src/backend/
     - git commit -m "Deploy backend from main" || echo "Nothing to commit"
     - git push origin prod-backend --force
