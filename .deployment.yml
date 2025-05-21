@@ -4,6 +4,7 @@ stages:
 deploy-backend:
   stage: deploy
   script:
+    - apt update && apt install -y git
     - git config user.name "GitLab CI"
     - git config user.email "ci@example.com"
     - git fetch origin
@@ -21,6 +22,7 @@ deploy-backend:
 deploy-frontend:
   stage: deploy
   script:
+    - apt update && apt install -y git
     - git config user.name "GitLab CI"
     - git config user.email "ci@example.com"
     - git fetch origin
