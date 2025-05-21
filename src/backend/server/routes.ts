@@ -1,7 +1,7 @@
 // src/server/routes.ts
 import { Router, Context , Next} from "https://deno.land/x/oak/mod.ts";
 import { create, getNumericDate } from "https://deno.land/x/djwt/mod.ts";
-import { DatabaseHandler } from "../../database/DatabaseHandler.ts";
+import { DatabaseHandler } from "../database/DatabaseHandler.ts";
 import { JWT_KEY } from "./backend.ts";
 import { verify, Payload } from "https://deno.land/x/djwt/mod.ts";
 
