@@ -1,4 +1,4 @@
-import { Player, CollisionLayer, Projectile } from "./EntityTypes.ts";
+import { Projectile } from "./EntityTypes.ts";
 
 const PROJECTILE_SPEED = 10;
 

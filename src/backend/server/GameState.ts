@@ -1,6 +1,6 @@
 import { Player, Projectile, Enemy } from "../game/EntityTypes.ts";
 
-// Game state
+// Game states
 export const gameState = {
   players: new Map<string, Player>(),
   projectiles: new Map<string, Projectile>(),
