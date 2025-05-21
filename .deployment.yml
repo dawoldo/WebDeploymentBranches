@@ -7,8 +7,8 @@ deploy-backend:
     - apt update && apt install -y git
     - git config user.name "GitLab CI"
     - git config user.email "ci@example.com"
-    - git fetch origin main
-    - git checkout -B prod-backend origin/prod-backend || git checkout --orphan prod-backend
+    - git fetch origin/main
+    - git checkout -B prod-backend origin/prod-backend 2>/dev/null || git checkout --orphan prod-frontend
     - rm -rf *
     - mkdir -p src/server
     - git checkout main -- src/server/
@@ -25,8 +25,8 @@ deploy-frontend:
     - apt update && apt install -y git
     - git config user.name "GitLab CI"
     - git config user.email "ci@example.com"
-    - git fetch origin main
-    - git checkout -B prod-frontend origin/prod-frontend || git checkout --orphan prod-frontend
+    - git checkout origin/main -- src/server/
+    - git checkout -B prod-backend origin/prod-backend 2>/dev/null || git checkout --orphan prod-backend
     - rm -rf *
     - mkdir -p public src/game
     - git checkout main -- public/ src/game/
