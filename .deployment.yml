@@ -7,11 +7,11 @@ deploy-backend:
     - apt update && apt install -y git
     - git config user.name "GitLab CI"
     - git config user.email "ci@example.com"
-    - git fetch origin/main
-    - git checkout -B prod-backend origin/prod-backend 2>/dev/null || git checkout --orphan prod-frontend
+    - git fetch origin  # Fetch all branches
+    - git checkout -B prod-backend origin/prod-backend 2>/dev/null || git checkout --orphan prod-backend
     - rm -rf *
     - mkdir -p src/server
-    - git checkout main -- src/server/
+    - git checkout origin/main -- src/server/  # Use origin/main instead of main
     - git add src/server/
     - git commit -m "Deploy backend from main" || echo "Nothing to commit"
     - git push origin prod-backend --force
@@ -25,11 +25,11 @@ deploy-frontend:
     - apt update && apt install -y git
     - git config user.name "GitLab CI"
     - git config user.email "ci@example.com"
-    - git checkout origin/main -- src/server/
-    - git checkout -B prod-backend origin/prod-backend 2>/dev/null || git checkout --orphan prod-backend
+    - git fetch origin  # Fetch all branches
+    - git checkout -B prod-frontend origin/prod-frontend 2>/dev/null || git checkout --orphan prod-frontend
     - rm -rf *
     - mkdir -p public src/game
-    - git checkout main -- public/ src/game/
+    - git checkout origin/main -- public/ src/game/  # Use origin/main instead of main
     - git add public/ src/game/
     - git commit -m "Deploy frontend from main" || echo "Nothing to commit"
     - git push origin prod-frontend --force
