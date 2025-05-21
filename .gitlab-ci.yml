@@ -7,6 +7,7 @@ update-frontend:
   script:
     - git config user.email "mohamed-zouhair.moudni@etu.umontpellier.fr"
     - git config user.name "mohamed-zouhair.moudni"
+    - git fetch origin  # Ensure all branches are fetched
     - git checkout frontend
     - git checkout main -- public/ src/frontend/
     - git add .
@@ -21,6 +22,7 @@ update-backend:
   script:
     - git config user.email "mohamed-zouhair.moudni@etu.umontpellier.fr"
     - git config user.name "mohamed-zouhair.moudni"
+    - git fetch origin  # Ensure all branches are fetched
     - git checkout backend
     - git checkout main -- src/backend/
     - git add .
