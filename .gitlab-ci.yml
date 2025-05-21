@@ -3,6 +3,7 @@ stages:
 
 update-frontend:
   stage: update
+  image: alpine/git  # Use a Docker image with Git pre-installed
   script:
     - git config user.email "mohamed-zouhair.moudni@etu.umontpellier.fr"
     - git config user.name "mohamed-zouhair.moudni"
@@ -16,6 +17,7 @@ update-frontend:
 
 update-backend:
   stage: update
+  image: alpine/git  # Use a Docker image with Git pre-installed
   script:
     - git config user.email "mohamed-zouhair.moudni@etu.umontpellier.fr"
     - git config user.name "mohamed-zouhair.moudni"
