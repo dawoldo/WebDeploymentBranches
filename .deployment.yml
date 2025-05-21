@@ -10,9 +10,9 @@ deploy-backend:
     - git fetch origin  # Fetch all branches
     - git checkout -B prod-backend origin/prod-backend 2>/dev/null || git checkout --orphan prod-backend
     - rm -rf *
-    - mkdir -p src/server
+    - mkdir -p src/backend
     - git checkout origin/main -- src/server/  # Use origin/main instead of main
-    - git add src/server/
+    - git add src/backend/
     - git commit -m "Deploy backend from main" || echo "Nothing to commit"
     - git push origin prod-backend --force
   when: manual
@@ -29,8 +29,8 @@ deploy-frontend:
     - git checkout -B prod-frontend origin/prod-frontend 2>/dev/null || git checkout --orphan prod-frontend
     - rm -rf *
     - mkdir -p public src/game
-    - git checkout origin/main -- public/ src/game/  # Use origin/main instead of main
-    - git add public/ src/game/
+    - git checkout origin/main -- public/ src/frontend/  # Use origin/main instead of main
+    - git add public/ src/frontend/
     - git commit -m "Deploy frontend from main" || echo "Nothing to commit"
     - git push origin prod-frontend --force
   when: manual
