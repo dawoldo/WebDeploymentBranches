@@ -1,0 +1,36 @@
+stages:
+  - deploy
+
+deploy-backend:
+  stage: deploy
+  script:
+    - git config user.name "GitLab CI"
+    - git config user.email "ci@example.com"
+    - git fetch origin
+    - git checkout -B prod-backend origin/prod-backend || git checkout --orphan prod-backend
+    - rm -rf *
+    - mkdir -p src/server
+    - git checkout main -- src/server/
+    - git add src/server/
+    - git commit -m "Deploy backend from main" || echo "Nothing to commit"
+    - git push origin prod-backend --force
+  when: manual
+  only:
+    - main
+
+deploy-frontend:
+  stage: deploy
+  script:
+    - git config user.name "GitLab CI"
+    - git config user.email "ci@example.com"
+    - git fetch origin
+    - git checkout -B prod-frontend origin/prod-frontend || git checkout --orphan prod-frontend
+    - rm -rf *
+    - mkdir -p public src/game
+    - git checkout main -- public/ src/game/
+    - git add public/ src/game/
+    - git commit -m "Deploy frontend from main" || echo "Nothing to commit"
+    - git push origin prod-frontend --force
+  when: manual
+  only:
+    - main
