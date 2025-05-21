@@ -2,9 +2,9 @@
 
 import { Context } from "https://deno.land/x/oak@v12.6.1/mod.ts";
 import { gameState, activeConnections, broadcastGameState } from './GameState.ts';
-import { Player } from "../../game/EntityTypes.ts";
+import { Player } from "../game/EntityTypes.ts";
 import { WORLD_WIDTH, WORLD_HEIGHT } from './config.ts';
-import { burstShot } from "../../game/ProjectilePatterns.ts";
+import { burstShot } from "../game/ProjectilePatterns.ts";
 
 // Handle new WebSocket connections
 export function handleWebSocketConnection(ctx: Context): void {

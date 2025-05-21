@@ -1,4 +1,4 @@
-import { Player, Projectile, Enemy } from "../../game/EntityTypes.ts";
+import { Player, Projectile, Enemy } from "../game/EntityTypes.ts";
 
 // Game states
 export const gameState = {

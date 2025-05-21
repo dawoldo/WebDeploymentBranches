@@ -2,7 +2,7 @@
 
 import { gameState, broadcastGameState } from './GameState.ts';
 import { TICK_RATE, PLAYER_TIMEOUT, WORLD_WIDTH, WORLD_HEIGHT } from './config.ts';
-import { CollisionSystem } from "../../game/CollisionSystem.ts";
+import { CollisionSystem } from "../game/CollisionSystem.ts";
 
 // Update the game state for a single tick
 export function updateGame(): void {
