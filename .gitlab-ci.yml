@@ -1,0 +1,28 @@
+stages:
+  - update
+
+update-frontend:
+  stage: update
+  script:
+    - git config user.email "mohamed-zouhair.moudni@etu.umontpellier.fr"
+    - git config user.name "mohamed-zouhair.moudni"
+    - git checkout frontend
+    - git checkout main -- public/ src/frontend/
+    - git add .
+    - git commit -m "Update frontend from main"
+    - git push origin prod-frontend
+  only:
+    - main
+
+update-backend:
+  stage: update
+  script:
+    - git config user.email "mohamed-zouhair.moudni@etu.umontpellier.fr"
+    - git config user.name "mohamed-zouhair.moudni"
+    - git checkout backend
+    - git checkout main -- src/backend/
+    - git add .
+    - git commit -m "Update backend from main"
+    - git push origin prod-backend
+  only:
+    - main
