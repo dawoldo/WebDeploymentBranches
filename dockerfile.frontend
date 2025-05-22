@@ -1,0 +1,11 @@
+# Use an official Deno runtime as a parent image
+FROM denoland/deno:latest
+
+# Set the working directory in the container
+WORKDIR /app
+
+COPY --from=builder /app .
+
+EXPOSE 3000
+
+CMD ["run", "--allow-net", "--allow-read", "--allow-env", "src/server/frontend.ts"]

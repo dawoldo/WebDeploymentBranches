@@ -16,15 +16,19 @@ before_script:
 deploy-backend:
   stage: deploy
   script:
-    # Create completely clean branch
+    # Create clean branch
     - git checkout --orphan prod-backend
     - git reset --hard
-    - git clean -fd
-    # Checkout only what we need
+    
+    # Get backend files AND its Dockerfile
     - mkdir -p "${BACKEND_SRC}"
-    - git checkout origin/main -- "${BACKEND_SRC}/"
-    # Commit only the backend files
-    - git add -f "${BACKEND_SRC}"
+    - git checkout origin/main -- "${BACKEND_SRC}/" "dockerfile.backend"
+    
+    # Rename Dockerfile for Dokku compatibility
+    - mv dockerfile.backend Dockerfile
+    
+    # Commit and push
+    - git add .
     - git commit -m "Deploy backend $(date +'%Y-%m-%d %H:%M')"
     - git push github prod-backend --force
   rules:
@@ -34,12 +38,19 @@ deploy-backend:
 deploy-frontend:
   stage: deploy
   script:
+    # Create clean branch
     - git checkout --orphan prod-frontend
     - git reset --hard
-    - git clean -fd
+    
+    # Get frontend files AND its Dockerfile
     - mkdir -p "public" "${FRONTEND_SRC}"
-    - git checkout origin/main -- "public/" "${FRONTEND_SRC}/"
-    - git add -f "public" "${FRONTEND_SRC}"
+    - git checkout origin/main -- "public/" "${FRONTEND_SRC}/" "dockerfile.frontend"
+    
+    # Rename Dockerfile for Dokku compatibility
+    - mv dockerfile.frontend Dockerfile
+    
+    # Commit and push
+    - git add .
     - git commit -m "Deploy frontend $(date +'%Y-%m-%d %H:%M')"
     - git push github prod-frontend --force
   rules:
