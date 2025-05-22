@@ -34,6 +34,10 @@ deploy-backend:
     - find "${BACKEND_SRC}" -type f -exec sed -i "s|localhost:8000|${BACKEND_URL_REPLACEMENT}|g" {} +
     - find "${BACKEND_SRC}" -type f -exec sed -i "s|localhost:3000|${FRONTEND_URL_REPLACEMENT}|g" {} +
     
+    # Commit changes (CRITICAL FIX)
+    - git add -A
+    - git commit -m "Deploy backend to Dokku"
+    
     # Push to Dokku
     - git remote add dokku-backend "${DOKKU_BACKEND_REMOTE}" || true
     - git push dokku-backend prod-backend:master --force
@@ -64,6 +68,10 @@ deploy-frontend:
     - find "public" -type f -exec sed -i "s|localhost:3000|${FRONTEND_URL_REPLACEMENT}|g" {} +
     - find "public" -type f -exec sed -i "s|localhost:8000|${BACKEND_URL_REPLACEMENT}|g" {} +
 
+    # Commit changes (CRITICAL FIX)
+    - git add -A
+    - git commit -m "Deploy frontend to Dokku"
+    
     # Push to Dokku
     - git remote add dokku-frontend "${DOKKU_FRONTEND_REMOTE}" || true
     - git push dokku-frontend prod-frontend:master --force
