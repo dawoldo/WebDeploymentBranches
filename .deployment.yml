@@ -47,7 +47,7 @@ deploy-backend:
     - if: $CI_COMMIT_BRANCH == "main"
       when: manual
 
-      deploy-frontend:
+deploy-frontend:
   stage: deploy
   script:
     # Verify SSH connection first
