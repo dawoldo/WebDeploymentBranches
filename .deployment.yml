@@ -3,81 +3,46 @@ stages:
 
 variables:
   DOKKU_BACKEND_REMOTE: "dokku@cluster-ig3.igpolytech.fr:rotmp-back"
-  DOKKU_FRONTEND_REMOTE: "dokku@cluster-ig3.igpolytech.fr:rotmp"
   BACKEND_SRC: "src/backend"
-  FRONTEND_SRC: "src/frontend"
   BACKEND_URL_REPLACEMENT: "rotmp-back.cluster-ig3.igpolytech.fr"
   FRONTEND_URL_REPLACEMENT: "rotmp.cluster-ig3.igpolytech.fr"
 
 before_script:
-  - apt-get update -y && apt-get install -y git
+  - apt-get update -y && apt-get install -y git openssh-client
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+  # Add your EXACT private key (without passphrase)
+  - echo "$DEPLOY_KEY" > ~/.ssh/id_ed25519
+  - chmod 600 ~/.ssh/id_ed25519
+  # Force SSH to use ONLY this key
+  - echo "IdentityFile ~/.ssh/id_ed25519" > ~/.ssh/config
+  - echo "IdentitiesOnly yes" >> ~/.ssh/config
+  # Verify host
+  - ssh-keyscan cluster-ig3.igpolytech.fr >> ~/.ssh/known_hosts
   - git config --global user.name "GitLab CI"
   - git config --global user.email "ci@example.com"
-  - git remote add github "${GITHUB_REPO}" || echo "GitHub remote exists"
-  - git fetch origin
 
 deploy-backend:
   stage: deploy
   script:
-    # Create clean branch
-    - git checkout --orphan prod-backend
+    # Test SSH connection first (debugging)
+    - ssh -vT dokku@cluster-ig3.igpolytech.fr
+    
+    # Prepare deployment branch
+    - git checkout --orphan dokku-deploy
     - git reset --hard
-    
-    # Get backend files and Dockerfile
-    - mkdir -p "${BACKEND_SRC}"
-    - git checkout origin/main -- "${BACKEND_SRC}/" "dockerfile.backend"
-    
-    # Rename Dockerfile for Dokku
+    - git checkout origin/main -- "${BACKEND_SRC}" dockerfile.backend
     - mv dockerfile.backend Dockerfile
 
-    # Replace ALL occurrences regardless of prefix
+    # Replace URLs (as in GitHub Actions)
     - find "${BACKEND_SRC}" -type f -exec sed -i "s|localhost:8000|${BACKEND_URL_REPLACEMENT}|g" {} +
     - find "${BACKEND_SRC}" -type f -exec sed -i "s|localhost:3000|${FRONTEND_URL_REPLACEMENT}|g" {} +
-    
-    # Commit changes (CRITICAL FIX)
+
+    # Commit and push
     - git add -A
-    - git commit -m "Deploy backend to Dokku"
-    
-    # Push to Dokku
-    - git remote add dokku-backend "${DOKKU_BACKEND_REMOTE}" || true
-    - git push dokku-backend prod-backend:master --force
-    
-    # Clean up
-    - rm -rf *
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-      when: manual
-
-deploy-frontend:
-  stage: deploy
-  script:
-    # Create clean branch
-    - git checkout --orphan prod-frontend
-    - git reset --hard
-    
-    # Get frontend files
-    - mkdir -p "public" "${FRONTEND_SRC}"
-    - git checkout origin/main -- "public/" "${FRONTEND_SRC}/" "dockerfile.frontend"
-    
-    # Rename Dockerfile
-    - mv dockerfile.frontend Dockerfile
-
-    # Replace ALL occurrences regardless of prefix
-    - find "${FRONTEND_SRC}" -type f -exec sed -i "s|localhost:8000|${BACKEND_URL_REPLACEMENT}|g" {} +
-    - find "${FRONTEND_SRC}" -type f -exec sed -i "s|localhost:3000|${FRONTEND_URL_REPLACEMENT}|g" {} +
-    - find "public" -type f -exec sed -i "s|localhost:3000|${FRONTEND_URL_REPLACEMENT}|g" {} +
-    - find "public" -type f -exec sed -i "s|localhost:8000|${BACKEND_URL_REPLACEMENT}|g" {} +
-
-    # Commit changes (CRITICAL FIX)
-    - git add -A
-    - git commit -m "Deploy frontend to Dokku"
-    
-    # Push to Dokku
-    - git remote add dokku-frontend "${DOKKU_FRONTEND_REMOTE}" || true
-    - git push dokku-frontend prod-frontend:master --force
-    
-    # Clean up
-    - rm -rf *
+    - git commit -m "Dokku deployment"
+    - git remote add dokku "${DOKKU_BACKEND_REMOTE}"
+    - git push dokku dokku-deploy:master --force
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
       when: manual
