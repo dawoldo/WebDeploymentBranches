@@ -2,9 +2,12 @@ stages:
   - deploy
 
 variables:
-  GITHUB_REPO: "https://$GITHUB_TOKEN@github.com/dawoldo/Web"
+  DOKKU_BACKEND_REMOTE: "dokku@cluster-ig3.igpolytech.fr:rotmp-back"
+  DOKKU_FRONTEND_REMOTE: "dokku@cluster-ig3.igpolytech.fr:rotmp"
   BACKEND_SRC: "src/backend"
   FRONTEND_SRC: "src/frontend"
+  BACKEND_URL_REPLACEMENT: "rotmp-back.cluster-ig3.igpolytech.fr"
+  FRONTEND_URL_REPLACEMENT: "rotmp.cluster-ig3.igpolytech.fr"
 
 before_script:
   - apt-get update -y && apt-get install -y git
@@ -20,17 +23,23 @@ deploy-backend:
     - git checkout --orphan prod-backend
     - git reset --hard
     
-    # Get backend files AND its Dockerfile
+    # Get backend files and Dockerfile
     - mkdir -p "${BACKEND_SRC}"
     - git checkout origin/main -- "${BACKEND_SRC}/" "dockerfile.backend"
     
-    # Rename Dockerfile for Dokku compatibility
+    # Rename Dockerfile for Dokku
     - mv dockerfile.backend Dockerfile
+
+    # Replace ALL occurrences regardless of prefix
+    - find "${BACKEND_SRC}" -type f -exec sed -i "s|localhost:8000|${BACKEND_URL_REPLACEMENT}|g" {} +
+    - find "${BACKEND_SRC}" -type f -exec sed -i "s|localhost:3000|${FRONTEND_URL_REPLACEMENT}|g" {} +
     
-    # Commit and push
-    - git add .
-    - git commit -m "Deploy backend $(date +'%Y-%m-%d %H:%M')"
-    - git push github prod-backend --force
+    # Push to Dokku
+    - git remote add dokku-backend "${DOKKU_BACKEND_REMOTE}" || true
+    - git push dokku-backend prod-backend:master --force
+    
+    # Clean up
+    - rm -rf *
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
       when: manual
@@ -42,17 +51,25 @@ deploy-frontend:
     - git checkout --orphan prod-frontend
     - git reset --hard
     
-    # Get frontend files AND its Dockerfile
+    # Get frontend files
     - mkdir -p "public" "${FRONTEND_SRC}"
     - git checkout origin/main -- "public/" "${FRONTEND_SRC}/" "dockerfile.frontend"
     
-    # Rename Dockerfile for Dokku compatibility
+    # Rename Dockerfile
     - mv dockerfile.frontend Dockerfile
+
+    # Replace ALL occurrences regardless of prefix
+    - find "${FRONTEND_SRC}" -type f -exec sed -i "s|localhost:8000|${BACKEND_URL_REPLACEMENT}|g" {} +
+    - find "${FRONTEND_SRC}" -type f -exec sed -i "s|localhost:3000|${FRONTEND_URL_REPLACEMENT}|g" {} +
+    - find "public" -type f -exec sed -i "s|localhost:3000|${FRONTEND_URL_REPLACEMENT}|g" {} +
+    - find "public" -type f -exec sed -i "s|localhost:8000|${BACKEND_URL_REPLACEMENT}|g" {} +
+
+    # Push to Dokku
+    - git remote add dokku-frontend "${DOKKU_FRONTEND_REMOTE}" || true
+    - git push dokku-frontend prod-frontend:master --force
     
-    # Commit and push
-    - git add .
-    - git commit -m "Deploy frontend $(date +'%Y-%m-%d %H:%M')"
-    - git push github prod-frontend --force
+    # Clean up
+    - rm -rf *
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
       when: manual

@@ -1,13 +1,9 @@
-# Use an official Deno runtime as a parent image
 FROM denoland/deno:latest
 
-# Set the working directory in the container
 WORKDIR /app
 
-COPY --from=builder /app .
+COPY src/backend/ .
 
-# Expose the port the app runs on
 EXPOSE 8000
 
-# Command to run the application
-CMD ["run", "--allow-net", "--allow-read", "--allow-env", "src/server/backend.ts"]
+CMD ["run", "--allow-net", "--allow-read", "--allow-env", "server/backend.ts"]
