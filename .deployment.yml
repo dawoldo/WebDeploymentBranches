@@ -2,28 +2,32 @@ stages:
   - deploy
 
 variables:
-  GITHUB_REPO: "https://$GITHUB_TOKEN@github.com/dawoldo/Web"  # Added token auth
-  BACKEND_SRC: "src/backend"  # Centralized paths
+  GITHUB_REPO: "https://$GITHUB_TOKEN@github.com/dawoldo/Web"
+  BACKEND_SRC: "src/backend"
   FRONTEND_SRC: "src/frontend"
 
 before_script:
-  - apt-get update -y && apt-get install -y git  # More reliable apt-get
+  - apt-get update -y && apt-get install -y git
   - git config --global user.name "GitLab CI"
   - git config --global user.email "ci@example.com"
   - git remote add github "${GITHUB_REPO}" || echo "GitHub remote exists"
-  - git fetch origin  # Only fetch origin (GitLab), GitHub will be pushed to
+  - git fetch origin
 
 deploy-backend:
   stage: deploy
   script:
-    - git checkout --orphan prod-backend  # Always start fresh
-    - rm -rf ./*  # More explicit path
+    # Create completely clean branch
+    - git checkout --orphan prod-backend
+    - git reset --hard
+    - git clean -fd
+    # Checkout only what we need
     - mkdir -p "${BACKEND_SRC}"
     - git checkout origin/main -- "${BACKEND_SRC}/"
-    - git add "${BACKEND_SRC}"
-    - git commit -m "Deploy backend $(date +'%Y-%m-%d %H:%M')" || echo "No changes"
-    - git push github prod-backend --force-with-lease  # Safer force push
-  rules:  # Modern replacement for only/when
+    # Commit only the backend files
+    - git add -f "${BACKEND_SRC}"
+    - git commit -m "Deploy backend $(date +'%Y-%m-%d %H:%M')"
+    - git push github prod-backend --force
+  rules:
     - if: $CI_COMMIT_BRANCH == "main"
       when: manual
 
@@ -31,12 +35,13 @@ deploy-frontend:
   stage: deploy
   script:
     - git checkout --orphan prod-frontend
-    - rm -rf ./*
+    - git reset --hard
+    - git clean -fd
     - mkdir -p "public" "${FRONTEND_SRC}"
     - git checkout origin/main -- "public/" "${FRONTEND_SRC}/"
-    - git add "public" "${FRONTEND_SRC}"
-    - git commit -m "Deploy frontend $(date +'%Y-%m-%d %H:%M')" || echo "No changes"
-    - git push github prod-frontend --force-with-lease
+    - git add -f "public" "${FRONTEND_SRC}"
+    - git commit -m "Deploy frontend $(date +'%Y-%m-%d %H:%M')"
+    - git push github prod-frontend --force
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
       when: manual
