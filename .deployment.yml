@@ -46,3 +46,30 @@ deploy-backend:
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
       when: manual
+
+      deploy-frontend:
+  stage: deploy
+  script:
+    # Verify SSH connection first
+    - ssh -vT dokku@cluster-ig3.igpolytech.fr
+    
+    # Prepare frontend files
+    - git checkout --orphan dokku-frontend
+    - git reset --hard
+    - git checkout origin/main -- "public/" "${FRONTEND_SRC}/" "dockerfile.frontend"
+    - mv dockerfile.frontend Dockerfile
+
+    # Replace URLs (same pattern as backend)
+    - find "${FRONTEND_SRC}" -type f -exec sed -i "s|localhost:3000|${FRONTEND_URL_REPLACEMENT}|g" {} +
+    - find "${FRONTEND_SRC}" -type f -exec sed -i "s|localhost:8000|${BACKEND_URL_REPLACEMENT}|g" {} +
+    - find "public" -type f -exec sed -i "s|localhost:3000|${FRONTEND_URL_REPLACEMENT}|g" {} +
+    - find "public" -type f -exec sed -i "s|localhost:8000|${BACKEND_URL_REPLACEMENT}|g" {} +
+
+    # Commit and push
+    - git add -A
+    - git commit -m "Frontend deployment"
+    - git remote add dokku-frontend "${DOKKU_FRONTEND_REMOTE}"
+    - git push dokku-frontend dokku-frontend:master --force
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: manual
