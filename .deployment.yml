@@ -1,38 +1,42 @@
 stages:
   - deploy
 
+variables:
+  GITHUB_REPO: "https://$GITHUB_TOKEN@github.com/dawoldo/Web"  # Added token auth
+  BACKEND_SRC: "src/backend"  # Centralized paths
+  FRONTEND_SRC: "src/frontend"
+
+before_script:
+  - apt-get update -y && apt-get install -y git  # More reliable apt-get
+  - git config --global user.name "GitLab CI"
+  - git config --global user.email "ci@example.com"
+  - git remote add github "${GITHUB_REPO}" || echo "GitHub remote exists"
+  - git fetch origin  # Only fetch origin (GitLab), GitHub will be pushed to
+
 deploy-backend:
   stage: deploy
   script:
-    - apt update && apt install -y git
-    - git config user.name "GitLab CI"
-    - git config user.email "ci@example.com"
-    - git fetch origin  # Fetch all branches
-    - git checkout -B prod-backend origin/prod-backend 2>/dev/null || git checkout --orphan prod-backend
-    - rm -rf *
-    - mkdir -p src/backend
-    - git checkout origin/main -- src/backend/  # Use origin/main instead of main
-    - git add src/backend/
-    - git commit -m "Deploy backend from main" || echo "Nothing to commit"
-    - git push origin prod-backend --force
-  when: manual
-  only:
-    - main
+    - git checkout --orphan prod-backend  # Always start fresh
+    - rm -rf ./*  # More explicit path
+    - mkdir -p "${BACKEND_SRC}"
+    - git checkout origin/main -- "${BACKEND_SRC}/"
+    - git add "${BACKEND_SRC}"
+    - git commit -m "Deploy backend $(date +'%Y-%m-%d %H:%M')" || echo "No changes"
+    - git push github prod-backend --force-with-lease  # Safer force push
+  rules:  # Modern replacement for only/when
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: manual
 
 deploy-frontend:
   stage: deploy
   script:
-    - apt update && apt install -y git
-    - git config user.name "GitLab CI"
-    - git config user.email "ci@example.com"
-    - git fetch origin  # Fetch all branches
-    - git checkout -B prod-frontend origin/prod-frontend 2>/dev/null || git checkout --orphan prod-frontend
-    - rm -rf *
-    - mkdir -p public src/game
-    - git checkout origin/main -- public/ src/frontend/  # Use origin/main instead of main
-    - git add public/ src/frontend/
-    - git commit -m "Deploy frontend from main" || echo "Nothing to commit"
-    - git push origin prod-frontend --force
-  when: manual
-  only:
-    - main
+    - git checkout --orphan prod-frontend
+    - rm -rf ./*
+    - mkdir -p "public" "${FRONTEND_SRC}"
+    - git checkout origin/main -- "public/" "${FRONTEND_SRC}/"
+    - git add "public" "${FRONTEND_SRC}"
+    - git commit -m "Deploy frontend $(date +'%Y-%m-%d %H:%M')" || echo "No changes"
+    - git push github prod-frontend --force-with-lease
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: manual
