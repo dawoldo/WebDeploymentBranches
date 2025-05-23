@@ -2,11 +2,9 @@ FROM denoland/deno:latest
 
 WORKDIR /app
 
-# Tini
-ENV TINI_SUBREAPER=true
-
-# Copy frontend files
+# Copy all source files
 COPY src/frontend/ .
+COPY public/ .
 
 EXPOSE 3000
 
