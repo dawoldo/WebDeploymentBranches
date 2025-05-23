@@ -10,6 +10,4 @@ COPY src/frontend/ .
 
 EXPOSE 3000
 
-ENTRYPOINT ["deno"]
-
-CMD ["run", "--allow-net", "--allow-read", "--allow-env", "frontend.ts"]  # Simplified path
+ENTRYPOINT ["deno", "run", "--allow-net", "--allow-read", "--allow-env", "frontend.ts"]  # Simplified path
