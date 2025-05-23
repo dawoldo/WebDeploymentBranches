@@ -2,11 +2,7 @@ FROM denoland/deno:latest
 
 WORKDIR /app
 
-COPY src/backend/ .
-
-RUN mkdir -p /app/src/backend/database && \
-    touch /app/src/backend/database/database.db && \
-    chmod 666 /app/src/backend/database/database.db
+COPY src/backend .
 
 EXPOSE 8000
 
