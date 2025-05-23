@@ -35,7 +35,7 @@ const keys = {
 };
 
 // Setup WebSocket
-const ws = new WebSocket(`ws://localhost:8000/ws`);
+const ws = new WebSocket(`ws://rotmp-back.cluster-ig3.igpolytech.fr/ws`);
 
 // Function to send chat messages
 function sendChatMessage(message) {

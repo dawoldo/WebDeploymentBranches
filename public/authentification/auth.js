@@ -6,7 +6,7 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
   const password = document.getElementById('password').value;
 
   try {
-    const response = await fetch("http://localhost:8000/login", {
+    const response = await fetch("http://rotmp-back.cluster-ig3.igpolytech.fr/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -47,7 +47,7 @@ document.getElementById('registration-form').addEventListener('submit', async (e
         return;
     }
 
-        const response = await fetch('http://localhost:8000/register', {
+        const response = await fetch('http://rotmp-back.cluster-ig3.igpolytech.fr/register', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
