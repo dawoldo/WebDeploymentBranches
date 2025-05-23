@@ -10,4 +10,4 @@ RUN mkdir -p /app/src/backend/database && \
 
 EXPOSE 8000
 
-CMD ["run", "--allow-net", "--allow-read", "--allow-write", "--allow-env", "server/backend.ts"]
+CMD ["deno", "run", "--allow-net", "--allow-read", "--allow-write", "--allow-env", "server/backend.ts"]
