@@ -2,47 +2,40 @@ stages:
   - deploy
 
 variables:
-  DOKKU_BACKEND_REMOTE: "dokku@cluster-ig3.igpolytech.fr:rotmp-back"
   BACKEND_SRC: "src/backend"
-  BACKEND_URL_REPLACEMENT: "rotmp-back.cluster-ig3.igpolytech.fr"
-  FRONTEND_URL_REPLACEMENT: "rotmp.cluster-ig3.igpolytech.fr"
+  FRONTEND_SRC: "src/frontend"
+  PUBLIC_DIR: "public"
+  BACKEND_PROD_URL: "rotmp-back.cluster-ig3.igpolytech.fr"
+  FRONTEND_PROD_URL: "rotmp.cluster-ig3.igpolytech.fr"
+  GITHUB_REPO: "https://$GITHUB_TOKEN@github.com/dawoldo/WebDeploymentBranches.git"
 
 before_script:
-  - apt-get update -y && apt-get install -y git openssh-client
-  - mkdir -p ~/.ssh
-  - chmod 700 ~/.ssh
-  # Add your EXACT private key (without passphrase)
-  - echo "$DEPLOY_KEY" > ~/.ssh/id_ed25519
-  - chmod 600 ~/.ssh/id_ed25519
-  # Force SSH to use ONLY this key
-  - echo "IdentityFile ~/.ssh/id_ed25519" > ~/.ssh/config
-  - echo "IdentitiesOnly yes" >> ~/.ssh/config
-  # Verify host
-  - ssh-keyscan cluster-ig3.igpolytech.fr >> ~/.ssh/known_hosts
+  - apt-get update -y && apt-get install -y git sed
   - git config --global user.name "GitLab CI"
   - git config --global user.email "ci@example.com"
 
 deploy-backend:
   stage: deploy
   script:
-    # Test SSH connection first (debugging)
-    - ssh -vT dokku@cluster-ig3.igpolytech.fr
+    # Clone repository
+    - git clone "${GITHUB_REPO}" deployment-repo
+    - cd deployment-repo
     
-    # Prepare deployment branch
-    - git checkout --orphan dokku-deploy
-    - git reset --hard
-    - git checkout origin/main -- "${BACKEND_SRC}" dockerfile.backend
+    # Create or checkout backend branch
+    - git checkout prod-backend || (git checkout --orphan prod-backend && git rm -rf .)
+    
+    # Add only backend files
+    - git checkout origin/main -- "${BACKEND_SRC}" "dockerfile.backend"
     - mv dockerfile.backend Dockerfile
-
-    # Replace URLs (as in GitHub Actions)
-    - find "${BACKEND_SRC}" -type f -exec sed -i "s|localhost:8000|${BACKEND_URL_REPLACEMENT}|g" {} +
-    - find "${BACKEND_SRC}" -type f -exec sed -i "s|localhost:3000|${FRONTEND_URL_REPLACEMENT}|g" {} +
-
+    
+    # Replace URLs
+    - find "${BACKEND_SRC}" -type f -exec sed -i "s|localhost:8000|${BACKEND_PROD_URL}|g" {} +
+    - find "${BACKEND_SRC}" -type f -exec sed -i "s|localhost:3000|${FRONTEND_PROD_URL}|g" {} +
+    
     # Commit and push
     - git add -A
-    - git commit -m "Dokku deployment"
-    - git remote add dokku "${DOKKU_BACKEND_REMOTE}"
-    - git push dokku dokku-deploy:master --force
+    - git commit -m "Backend deployment $(date +%Y-%m-%d_%H:%M:%S)"
+    - git push origin prod-backend --force
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
       when: manual
@@ -50,26 +43,27 @@ deploy-backend:
 deploy-frontend:
   stage: deploy
   script:
-    # Verify SSH connection first
-    - ssh -vT dokku@cluster-ig3.igpolytech.fr
+    # Clone repository
+    - git clone "${GITHUB_REPO}" deployment-repo
+    - cd deployment-repo
     
-    # Prepare frontend files
-    - git checkout --orphan dokku-frontend
-    - git reset --hard
-    - git checkout origin/main -- "public/" "${FRONTEND_SRC}/" "dockerfile.frontend"
+    # Create or checkout frontend branch
+    - git checkout prod-frontend || (git checkout --orphan prod-frontend && git rm -rf .)
+    
+    # Add only frontend files
+    - git checkout origin/main -- "${FRONTEND_SRC}" "${PUBLIC_DIR}" "dockerfile.frontend"
     - mv dockerfile.frontend Dockerfile
-
-    # Replace URLs (same pattern as backend)
-    - find "${FRONTEND_SRC}" -type f -exec sed -i "s|localhost:3000|${FRONTEND_URL_REPLACEMENT}|g" {} +
-    - find "${FRONTEND_SRC}" -type f -exec sed -i "s|localhost:8000|${BACKEND_URL_REPLACEMENT}|g" {} +
-    - find "public" -type f -exec sed -i "s|localhost:3000|${FRONTEND_URL_REPLACEMENT}|g" {} +
-    - find "public" -type f -exec sed -i "s|localhost:8000|${BACKEND_URL_REPLACEMENT}|g" {} +
-
+    
+    # Replace URLs
+    - find "${FRONTEND_SRC}" -type f -exec sed -i "s|localhost:3000|${FRONTEND_PROD_URL}|g" {} +
+    - find "${FRONTEND_SRC}" -type f -exec sed -i "s|localhost:8000|${BACKEND_PROD_URL}|g" {} +
+    - find "${PUBLIC_DIR}" -type f -exec sed -i "s|localhost:3000|${FRONTEND_PROD_URL}|g" {} +
+    - find "${PUBLIC_DIR}" -type f -exec sed -i "s|localhost:8000|${BACKEND_PROD_URL}|g" {} +
+    
     # Commit and push
     - git add -A
-    - git commit -m "Frontend deployment"
-    - git remote add dokku-frontend "${DOKKU_FRONTEND_REMOTE}"
-    - git push dokku-frontend dokku-frontend:master --force
+    - git commit -m "Frontend deployment $(date +%Y-%m-%d_%H:%M:%S)"
+    - git push origin prod-frontend --force
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
       when: manual
