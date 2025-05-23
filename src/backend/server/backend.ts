@@ -14,7 +14,7 @@ const app = new Application();
 // Use middlewares
 app.use(errorHandler);
 app.use(oakCors({
-  origin: "http://localhost:3000", // Allow requests from the frontend
+  origin: "http://rotmp.cluster-ig3.igpolytech.fr", // Allow requests from the frontend
   credentials: true               // Allow cookies to be sent across origins
 }));
 app.use(corsMiddleware);
