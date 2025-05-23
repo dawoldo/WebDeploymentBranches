@@ -9,5 +9,7 @@ ENV TINI_SUBREAPER=true
 COPY src/frontend/ .
 
 EXPOSE 3000
-    
-CMD ["deno", "run", "--allow-net", "--allow-read", "--allow-env", "frontend.ts"]  # Simplified path
+
+ENTRYPOINT ["deno"]
+
+CMD ["run", "--allow-net", "--allow-read", "--allow-env", "frontend.ts"]  # Simplified path
