@@ -4,7 +4,7 @@ import { DB } from "https://deno.land/x/sqlite/mod.ts";
 export class DatabaseHandler {
     private db: DB;
 
-    constructor(dbPath: string = "src/database/database.db") {
+    constructor(dbPath: string = "src/backend/database/database.db") {
         this.db = new DB(dbPath);
         this.initDatabase();
     }
