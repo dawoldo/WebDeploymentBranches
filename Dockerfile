@@ -8,4 +8,4 @@ COPY public/ .
 
 EXPOSE 3000
 
-CMD ["deno", "run", "--allow-net", "--allow-read", "frontend.ts"]
+CMD ["deno", "run", "--allow-net", "--allow-env", "--allow-read", "frontend.ts"]
