@@ -7,10 +7,26 @@ const HOSTNAME = Deno.env.get("HOST") || "0.0.0.0";
 const app = new Application();
 
 app.use(async (ctx) => {
-  await send(ctx, ctx.request.url.pathname, {
-    root: `${Deno.cwd()}/`,
-    index: "index.html",
-  });
+  try {
+    await send(ctx, ctx.request.url.pathname, {
+      root: `${Deno.cwd()}`,
+      index: "index.html",
+    });
+  } catch (error) {
+    console.error("Send error:", error);
+    // Fallback to index.html for SPA routing
+    try {
+      await send(ctx, 
+        "/index.html", {
+        root: Deno.cwd(),
+      });
+    } catch (fallbackError) {
+      console.error("Fallback error:", fallbackError);
+      ctx.response.status = 500;
+      ctx.response.body = "Internal Server Error";
+    }
+  }
+  
 });
 
 console.log(`🟢 Frontend running on ${HOSTNAME}:${PORT}`);
