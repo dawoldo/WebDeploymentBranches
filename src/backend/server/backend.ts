@@ -14,8 +14,8 @@ const app = new Application();
 // Use middlewares
 app.use(errorHandler);
 app.use(oakCors({
-  origin: "http://rotmp.cluster-ig3.igpolytech.fr:3000", // Allow requests from the frontend
-  credentials: true               // Allow cookies to be sent across origins
+  origin: "https://rotmp.cluster-ig3.igpolytech.fr:3000", // Allow requests from the frontend
+  credentials: true,              // Allow cookies to be sent across origins
 }));
 app.use(corsMiddleware);
 
@@ -29,10 +29,10 @@ app.use(router.routes());
 app.use(router.allowedMethods());
 
 app.use(async (ctx) => {
-  if (ctx.request.url.pathname === "/ws") {
+  if (ctx.request.url.pathname === "/wss") {
     handleWebSocketConnection(ctx);
   }
 });
 
-console.log(`🟢 Backend running at http://localhost:${PORT}`);
+console.log(`🟢 Backend running`);
 await app.listen({ port: PORT });
