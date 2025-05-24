@@ -13,16 +13,20 @@ const app = new Application({
   proxy: true, // Important for handling reverse proxy headers
 });
 
-
-// Special handling for Let's Encrypt challenges
-// Use middlewares
 app.use(async (ctx, next) => {
-  if (ctx.request.url.pathname.startsWith('/.well-known/acme-challenge/')) {
-    ctx.response.headers.set('Strict-Transport-Security', 'max-age=0');
-    ctx.response.status = 404; // Or serve the actual challenge if you can
-    return;
-  }
-  await next();
+if (ctx.request.method === "OPTIONS") {
+  ctx.response.status = 204;
+  ctx.response.headers.set(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
+  ctx.response.headers.set(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization"
+  );
+  return;
+}
+await next();
 });
 
 // CORS Configuration - allow both HTTP and HTTPS
