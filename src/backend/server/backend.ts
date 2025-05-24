@@ -14,11 +14,12 @@ const app = new Application();
 // Use middlewares
 app.use(errorHandler);
 app.use(oakCors({
-  origin: "https://rotmp.cluster-ig3.igpolytech.fr:3000", // Allow requests from the frontend
-  credentials: true,              // Allow cookies to be sent across origins
+  origin: "http://rotmp.cluster-ig3.igpolytech.fr:3000", // Allow requests from the frontend
+  credentials: true               // Allow cookies to be sent across origins
 }));
 app.use(corsMiddleware);
 
+//
 // Start game loop
 startGameLoop();
 
@@ -28,10 +29,10 @@ app.use(router.routes());
 app.use(router.allowedMethods());
 
 app.use(async (ctx) => {
-  if (ctx.request.url.pathname === "/wss") {
+  if (ctx.request.url.pathname === "/ws") {
     handleWebSocketConnection(ctx);
   }
 });
 
-console.log(`🟢 Backend running`);
+console.log(`🟢 Backend running at http://localhost:${PORT}`);
 await app.listen({ port: PORT });

@@ -26,7 +26,6 @@ router.post("/login", async (ctx: Context) => {
 
       ctx.cookies.set("login-info", token, {
         httpOnly: true,
-        secure: true,
         maxAge: 60 * 60 * 24,
         path: "/",
       });
