@@ -7,6 +7,7 @@ import { errorHandler, corsMiddleware, authenticate } from "./middlewares.ts";
 import router from "./routes.ts";
 
 const PORT = 8000;
+const HOSTNAME = Deno.env.get("HOST") || "0.0.0.0";
 export const JWT_KEY = await crypto.subtle.generateKey({ name: "HMAC", hash: "SHA-256" }, true, ["sign", "verify"]);
 
 const app = new Application();
@@ -33,5 +34,5 @@ app.use(async (ctx) => {
   }
 });
 
-console.log(`🟢 Backend running`);
-await app.listen({ port: PORT });
+console.log(`🟢 Backend running on ${HOSTNAME}:${PORT}`);
+await app.listen({ hostname: HOSTNAME, port: PORT });
