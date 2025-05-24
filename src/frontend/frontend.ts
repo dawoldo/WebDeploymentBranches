@@ -1,7 +1,9 @@
 import { Application } from "https://deno.land/x/oak/mod.ts";
 import { send } from "https://deno.land/x/oak/send.ts";
 
-const PORT = 3000;
+const PORT = parseInt(Deno.env.get("PORT") || "3000");
+const HOSTNAME = Deno.env.get("HOST") || "0.0.0.0";
+
 const app = new Application();
 
 app.use(async (ctx) => {
@@ -11,5 +13,5 @@ app.use(async (ctx) => {
   });
 });
 
-console.log(`🟢 Frontend running`);
-await app.listen({ port: PORT });
+console.log(`🟢 Frontend running on ${HOSTNAME}:${PORT}`);
+await app.listen({ hostname: HOSTNAME, port: PORT });
