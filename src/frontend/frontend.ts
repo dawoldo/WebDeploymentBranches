@@ -11,8 +11,5 @@ app.use(async (ctx) => {
   });
 });
 
-console.log(`🟢 Frontend running at http://localhost:${PORT}`);
-await app.listen({ 
-  port: PORT,
-  hostname: "0.0.0.0"  // listening on all interfaces
-});
+console.log(`🟢 Frontend running`);
+await app.listen({ port: PORT });
