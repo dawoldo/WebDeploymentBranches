@@ -9,38 +9,16 @@ import router from "./routes.ts";
 const PORT = 8000;
 export const JWT_KEY = await crypto.subtle.generateKey({ name: "HMAC", hash: "SHA-256" }, true, ["sign", "verify"]);
 
-const app = new Application({
-  proxy: true, // Important for handling reverse proxy headers
-});
+const app = new Application();
 
-app.use(async (ctx, next) => {
-if (ctx.request.method === "OPTIONS") {
-  ctx.response.status = 204;
-  ctx.response.headers.set(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS"
-  );
-  ctx.response.headers.set(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization"
-  );
-  return;
-}
-await next();
-});
-
-// CORS Configuration - allow both HTTP and HTTPS
+// Use middlewares
 app.use(errorHandler);
 app.use(oakCors({
-  origin: [
-    "http://rotmp.cluster-ig3.igpolytech.fr:3000",
-    "https://rotmp.cluster-ig3.igpolytech.fr",
-    "http://rotmp.cluster-ig3.igpolytech.fr:3000" // For local development
-  ],
-  credentials: true,
+  origin: "http://rotmp.cluster-ig3.igpolytech.fr:3000", // Allow requests from the frontend
+  credentials: true,              // Allow cookies to be sent across origins
 }));
+app.use(corsMiddleware);
 
-//
 // Start game loop
 startGameLoop();
 
