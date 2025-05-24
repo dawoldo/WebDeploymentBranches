@@ -182,7 +182,7 @@ function sendInput() {
   }
 }
 
-// Shooting (unchanged)
+// Shooting
 CANVAS.addEventListener("click", (e) => {
   if (!gameState.myPlayerId) return;
 
@@ -199,7 +199,7 @@ CANVAS.addEventListener("click", (e) => {
   }
 });
 
-// Rendering (unchanged but uses gameState)
+// Rendering
 function render() {
   CONTEXT.clearRect(0, 0, CANVAS.width, CANVAS.height);
 

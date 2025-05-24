@@ -1,4 +1,3 @@
-// src/server/frontend.ts
 import { Application } from "https://deno.land/x/oak/mod.ts";
 import { send } from "https://deno.land/x/oak/send.ts";
 
@@ -12,5 +11,5 @@ app.use(async (ctx) => {
   });
 });
 
-console.log(`🟢 Frontend running`);
+console.log(`🟢 Frontend running at http://localhost:${PORT}`);
 await app.listen({ port: PORT });
