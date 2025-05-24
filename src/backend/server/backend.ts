@@ -36,13 +36,6 @@ app.use(oakCors({
   credentials: true,
 }));
 
-
-app.use(oakCors({
-  origin: "https://rotmp.cluster-ig3.igpolytech.fr:3000", // Allow requests from the frontend
-  credentials: true,              // Allow cookies to be sent across origins
-}));
-app.use(corsMiddleware);
-
 //
 // Start game loop
 startGameLoop();
